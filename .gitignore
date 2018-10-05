@@ -1,0 +1,4 @@
+.vscode/
+Dataset/*
+.DS_Store
+TestData/
