@@ -1,15 +1,20 @@
 import sys
 from os import listdir
-from PIL import Image
 import numpy as np
 import pickle
-
+from PIL import Image
+import cv2
 from sklearn import tree
-from sklearn import datasets
+from sklearn.ensemble import RandomForestClassifier
+
+default_image_size = tuple((45,45))
 
 def get_image_matrix(image_dir):
     try:
         image_grayscale = Image.open(image_dir).convert('L')
+        #resize image
+        image_grayscale = image_grayscale.resize(default_image_size, Image.ANTIALIAS)
+        #
         image_np = np.array(image_grayscale)
         img_list = []
         for line in image_np:
@@ -36,7 +41,7 @@ def get_train_test_images_from_directory(dataset_dir):
             print("Train Dataset folder is empty or dataset folder contains no image")
             return None, None, None, None
         
-        for directory in directory_list:
+        for directory in directory_list[:2]:
             print(directory)
             image_dir = listdir(f"{dataset_dir}/{directory}")
             if '.DS_Store' in image_dir:
@@ -62,11 +67,12 @@ def train_model():
     train_dataset_dir = "./Dataset/"
     X_train, X_test, Y_train, Y_test = get_train_test_images_from_directory(train_dataset_dir)
     if X_train is not None and X_test is not None and Y_train is not None and Y_test is not None :
-        decision_tree_classifier = tree.DecisionTreeClassifier()
+        # decision_tree_classifier = tree.DecisionTreeClassifier()
+        decision_tree_classifier = RandomForestClassifier()
         decision_tree_classifier.fit(X_train,Y_train)
         accuracy_score = decision_tree_classifier.score(X_train,Y_train)
         # save classifier
-        pickle.dump(decision_tree_classifier,open("Model/decision_tree_classifier.pkl",'wb'))
+        pickle.dump(decision_tree_classifier,open("Model/decision_tree_classifier02.pkl",'wb'))
         print(f"Model Accuracy Score : {accuracy_score}")
         test_accuracy_score = decision_tree_classifier.score(X_test,Y_test)
         print(f"Model Accuracy Score (Test) : {test_accuracy_score}")
@@ -80,12 +86,13 @@ def main():
             image_directory = args[1]
             image_file = [get_image_matrix(image_directory)]
             # load saved model
-            saved_decision_tree_classifier_model = pickle.load(open("Model/decision_tree_classifier.pkl",'rb'))
-            if saved_decision_tree_classifier_model is not None :
+            try:
+                saved_decision_tree_classifier_model = pickle.load(open("Model/decision_tree_classifier.pkl",'rb'))
                 model_prediction = saved_decision_tree_classifier_model.predict(image_file)
                 print(f"Recognized Digit : {model_prediction[0]}")
-            else :
-                print("Training Model")
+            except FileNotFoundError as model_file_error:
+                print(f"Error : {model_file_error}")
+                print("... Training Model")
                 train_model()
         else:
             print("Error : You have not specified an image path")
