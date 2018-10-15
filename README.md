@@ -14,3 +14,4 @@ Convert hand written mathematical expressions and formula to latext.
 ## Todo
 
 1. Recognition of text on a page
+2. Deploy model for use as an API
