@@ -4,7 +4,6 @@ import numpy as np
 import pickle
 from PIL import Image
 import cv2
-from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 
 default_image_size = tuple((45,45))
@@ -67,14 +66,13 @@ def train_model():
     train_dataset_dir = "./Dataset/"
     X_train, X_test, Y_train, Y_test = get_train_test_images_from_directory(train_dataset_dir)
     if X_train is not None and X_test is not None and Y_train is not None and Y_test is not None :
-        # decision_tree_classifier = tree.DecisionTreeClassifier()
-        decision_tree_classifier = RandomForestClassifier()
-        decision_tree_classifier.fit(X_train,Y_train)
-        accuracy_score = decision_tree_classifier.score(X_train,Y_train)
+        random_forest_classifier = RandomForestClassifier()
+        random_forest_classifier.fit(X_train,Y_train)
+        accuracy_score = random_forest_classifier.score(X_train,Y_train)
         # save classifier
-        pickle.dump(decision_tree_classifier,open("Model/decision_tree_classifier02.pkl",'wb'))
+        pickle.dump(random_forest_classifier,open("Model/random_forest_classifier.pkl",'wb'))
         print(f"Model Accuracy Score : {accuracy_score}")
-        test_accuracy_score = decision_tree_classifier.score(X_test,Y_test)
+        test_accuracy_score = random_forest_classifier.score(X_test,Y_test)
         print(f"Model Accuracy Score (Test) : {test_accuracy_score}")
     else :
         print("An error occurred.")
@@ -105,9 +103,9 @@ def main():
             image_file = [get_image_matrix(image_directory)]
             # load saved model
             try:
-                saved_decision_tree_classifier_model = pickle.load(open("Model/decision_tree_classifier.pkl",'rb'))
+                saved_decision_tree_classifier_model = pickle.load(open("Model/random_forest_classifier.pkl",'rb'))
                 model_prediction = saved_decision_tree_classifier_model.predict(image_file)
-                print(f"Recognized Digit : {model_prediction[0]} \n Latex Equivalent : {transform_to_latex(model_prediction[0])}")
+                print(f"Recognized Digit : {model_prediction[0]} \nLatex Equivalent : {transform_to_latex(model_prediction[0])}")
             except FileNotFoundError as model_file_error:
                 print(f"Error : {model_file_error}")
                 print("... Training Model")
